@@ -81,16 +81,35 @@ class Minesweeper
         end
         return  true
     end
+
+    def flag(x,y)
+        if @field[x][y] == 'F' || @field[x][y] == ' '
+            return false
+        end
+        @field[x][y] = 'F'
+        if @bombs_pos.include? [x,y]
+            @bombs_flagged += 1
+
+            if @bombs_flagged == @bombs_pos.size
+                @victory = true
+                @playing = false
+            end
+        end
+        return true 
+    end
     
-    
-    def printField
+    def printField(xray = false)
         @field.each_index do |i|
             @field[0].each_index do |j|
-                print "#{@field[i][j]} " 
+                if xray && @bombs_pos.include?([i,j])
+                    message = (@field[i][j] == 'F') ? "C " : "# "
+                    print message
+                else
+                    print "#{@field[i][j]} "
+                end 
             end
             puts
         end
-        print @bombs_pos
         puts
     end
 end
