@@ -1,5 +1,15 @@
 class Minesweeper
 
+    # States:
+    # >0 --> Number of Bombs nearby cell (Radius of 1 cell)
+    # 0 --> Empty Cell
+    # -1 --> Unknown Cell 
+    # -2 --> Empty Unknown Flagged
+    # -10 --> Bomb
+    # -11 --> Flagged Bomb
+    # -99 --> Bomb Exploded
+    # 
+
     def initialize(width, height, nbombs)
         # Field with actual status of the game
         @field = []
@@ -15,10 +25,10 @@ class Minesweeper
         @bombs_flagged = 0
 
         # Initate Field
-        for i in 0..width
+        for x in 0..width
             line = []
-            for j in 0..height
-                line.push '.'
+            for y in 0..height
+                line.push -1
             end
             @field.push line
         end
@@ -26,10 +36,10 @@ class Minesweeper
         # Calculate bombs positions
         bombs_set = 0
         while bombs_set < nbombs do
-            i = Random.rand(@field.length-1)
-            j = Random.rand(@field[0].length-1)
-            if not @bombs_pos.include? [i,j]
-                @bombs_pos.push([i,j])
+            x = Random.rand(@field.length-1)
+            y = Random.rand(@field[0].length-1)
+            if not @field[x][y] == -10
+                @field[x][y] = -10
                 bombs_set += 1
             end
         end
@@ -43,39 +53,50 @@ class Minesweeper
         @victory
     end
 
-    def play(x,y)
+    def play(i,j)
+        
+        # Verify if its i j are within the matrice bounds
+        if i < 0 || j < 0 || i >= @field.length || j >= @field[0].length
+            return false
+        end
         
         # Verify if clicked on a BOMB
-        if @bombs_pos.include? [x,y]
+        if @field[i][j] == -10
+            @field[i][j] = -99
             @playing = false
         end
         
-        # Verify if its valid
-        if x >= @field.length || x < 0 || y < 0 || y >= @field[0].length || @field[x][y] != '.'  
+        # Verify if its Unknown
+        if  @field[i][j] != -1  
             return false
         end
        
+       
         # Verify if got any bombs nearby
         nearby = 0
-        x_pos = [x, x+1, x-1]
-        y_pos = [y, y+1, y-1]
+        i_pos = [i, i+1, i-1]
+        j_pos = [j, j+1, j-1]
 
-        x_pos.each do |x|
-            y_pos.each do |y|
-                if @bombs_pos.include? [x,y]
-                    nearby += 1
+        i_pos.each do |i|
+            j_pos.each do |j|
+                begin
+                    if (@field[i][j] >= -12 && @field[i][j] <= -10)
+                        nearby += 1
+                    end
+                rescue
+                    # Do nothing
                 end
             end
         end
 
         if nearby > 0
-            @field[x][y] = nearby
+            @field[i][j] = nearby
         else
             # Fazer recursiva as chamadas para os vizinhos proóximos
-            @field[x][y] = ' '
-            x_pos.each do |x|
-                y_pos.each do |y|
-                    self.play(x,y)
+            @field[i][j] = 0
+            i_pos.each do |i|
+                j_pos.each do |j|
+                    self.play(i,j)
                 end
             end
         end
@@ -83,13 +104,31 @@ class Minesweeper
     end
 
     def flag(x,y)
-        if @field[x][y] == 'F' || @field[x][y] == ' '
+        # Se a célula foi clicada antes
+        if @field[x][y] >= 0
             return false
         end
-        @field[x][y] = 'F'
-        if @bombs_pos.include? [x,y]
+
+        # Se clicou em cima de uma flag
+        # desfaz
+        if [-2,-11].include?(@field[x][y]) 
+            @field[x][y] += 1
+
+            # Se a flag de uma bomba for tirada, desfaz
+            if @field[x][y] == 10
+                @bombs_flagged -= 1
+            end
+
+            return true
+        end
+        
+        # Célula Desconhecida Ou Bomba desconhecida foi flaggeada
+        @field[x][y] += -1
+
+        if @field[x][y] == -11
             @bombs_flagged += 1
 
+            # Se todas as bombas foram flaggeadas
             if @bombs_flagged == @bombs_pos.size
                 @victory = true
                 @playing = false
@@ -98,18 +137,26 @@ class Minesweeper
         return true 
     end
     
-    def printField(xray = false)
-        @field.each_index do |i|
-            @field[0].each_index do |j|
-                if xray && @bombs_pos.include?([i,j])
-                    message = (@field[i][j] == 'F') ? "C " : "# "
-                    print message
-                else
-                    print "#{@field[i][j]} "
-                end 
+    def board_state(xray = false)
+        if !xray
+            new_field = []
+            @field.each do |line|
+                new_line = []
+                line.each do |elem|
+                    case elem
+                    when -2, -11
+                        new_line.push(-2)
+                    when -10
+                        new_line.push(-1)
+                    else
+                        new_line.push(elem)
+                    end
+                end
+                new_field.push(new_line)
             end
-            puts
+            return new_field
+        else # XRAY TRUE
+            return @field
         end
-        puts
     end
 end
