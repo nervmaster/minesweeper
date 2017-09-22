@@ -1,35 +1,30 @@
-class PrettyPrinter
-    # States:
-    # >0 --> Number of Bombs nearby cell (Radius of 1 cell)
-    # 0 --> Empty Cell
-    # -1 --> Unknown Cell 
-    # -2 --> Empty Unknown Flagged
-    # -10 --> Bomb
-    # -11 --> Flagged Bomb
-    # -99 --> Bomb Exploded
+module MineSweeper
+    require_relative "States_Constants"
 
-    def print(matrix)
-        matrix.each do |line|
-            line.each do |cell|
-                case cell
-                when 0
-                    $stdout.print "  "
-                when -1
-                    $stdout.print ". "
-                when -2
-                    $stdout.print "F "
-                when -11
-                    $stdout.print "O "
-                when -10
-                    $stdout.print "# "
-                when -99
-                    $stdout.print "X "
-                else
-                    $stdout.print "#{cell} "
+    class PrettyPrinter
+        def print(matrix)
+            matrix.each do |line|
+                line.each do |cell|
+                    case cell
+                    when 0 #Empty Cell
+                        $stdout.print "  "
+                    when UNKNOWN_CELL
+                        $stdout.print ". "
+                    when EMPTY_UNKNOWN_FLAGGED
+                        $stdout.print "F "
+                    when BOMB_FLAGGED
+                        $stdout.print "O "
+                    when BOMB_CELL
+                        $stdout.print "# "
+                    when BOMB_EXPLODED
+                        $stdout.print "@ "
+                    else #Imprime o numero da celula
+                        $stdout.print "#{cell} "
+                    end
                 end
+                puts 
             end
-            puts 
+            puts
         end
-        puts
     end
-end
+end #Module
