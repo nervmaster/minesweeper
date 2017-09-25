@@ -24,7 +24,7 @@ Um pequeno projeto de um jogo de campo minado
     print(board_state) - Recebe o campo de um campo minado e imprime de forma agradável ao jogador no STDOUT. Aqui vai uma legenda das células:
       * @ -> Bomba Explodida
       * B -> Bomba com Flag
-      * # -> Bomba sem Flag
+      * \# -> Bomba sem Flag
       * . -> Célula sem bomba não clicada
       * F -> Célula vazia com Flag
       *   -> Célula vazia sem bombas ao redor (valor 0)
