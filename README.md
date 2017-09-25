@@ -22,10 +22,10 @@ Um pequeno projeto de um jogo de campo minado
 
   * PrettyPrinter.rb - Arquivo com o código de uma classe de uma impressora elaborada. 
     print(board_state) - Recebe o campo de um campo minado e imprime de forma agradável ao jogador no STDOUT. Aqui vai uma legenda das células:
-      * @ -> Bomba Explodida
-      * B -> Bomba com Flag
-      * \# -> Bomba sem Flag
-      * . -> Célula sem bomba não clicada
-      * F -> Célula vazia com Flag
-      *   -> Célula vazia sem bombas ao redor (valor 0)
+      * '@' -> Bomba Explodida
+      * 'B' -> Bomba com Flag
+      * '\#' -> Bomba sem Flag
+      * '.' -> Célula sem bomba não clicada
+      * 'F' -> Célula vazia com Flag
+      * ' ' -> Célula vazia sem bombas ao redor (valor 0)
       * 1..5 -> Célula vazia clicada com 1 ou mais bombas ao redor
