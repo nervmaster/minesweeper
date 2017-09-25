@@ -12,14 +12,14 @@ module MineSweeper
 
             # Victory conditions
             @victory = false
-            @bombs_flagged = 0
-            @nbombs = nbombs
+            @cells_to_discover = width*height - nbombs
+            @discovered_cells = 0
 
 
             # Initate Field
-            for x in 0..width
+            for x in 0...width
                 line = []
-                for y in 0..height
+                for y in 0...height
                     line.push UNKNOWN_CELL
                 end
                 @field.push line
@@ -27,9 +27,9 @@ module MineSweeper
 
             # Calculate bombs positions
             bombs_set = 0
-            while bombs_set < @nbombs do
-                x = Random.rand(@field.length-1)
-                y = Random.rand(@field[0].length-1)
+            while bombs_set < nbombs do
+                x = Random.rand(width)
+                y = Random.rand(height)
                 if not @field[x][y] == BOMB_CELL
                     @field[x][y] = BOMB_CELL
                     bombs_set += 1
@@ -56,12 +56,14 @@ module MineSweeper
             if @field[x][y] == BOMB_CELL
                 @field[x][y] = BOMB_EXPLODED
                 @playing = false
+                return false
             end
             
             # Verify if its not Unknown
             if  @field[x][y] != UNKNOWN_CELL  
                 return false
             end
+
         
             # Verify if got any bombs nearby
             nearby = 0
@@ -82,11 +84,21 @@ module MineSweeper
                 end
             end
 
+            # A new discovered  cell
+            @discovered_cells += 1
+            # If got an win condition
+            if @discovered_cells == @cells_to_discover
+                @field[x][y] = nearby
+                @playing = false
+                @victory = true
+                return true
+            end
+    
             if nearby > 0
                 @field[x][y] = nearby
             else
-                # Fazer recursiva as chamadas para os vizinhos próximos
-                # Se uma célula vazia
+                # Recursive call for neighbor cells
+                # if an empty cell
                 @field[x][y] = 0
                 x_pos.each do |x|
                     y_pos.each do |y|
@@ -98,36 +110,21 @@ module MineSweeper
         end
 
         def flag(x,y)
-            # Se a célula foi clicada antes
+            # If cell was already clicked
             if @field[x][y] >= 0
                 return false
             end
 
-            # Se clicou em cima de uma flag
-            # desfaz
+            # If its a flagged cell
+            # undo flag
             if [EMPTY_UNKNOWN_FLAGGED,BOMB_FLAGGED].include?(@field[x][y]) 
                 @field[x][y] = (@field[x][y] == BOMB_FLAGGED) ? BOMB_CELL : UNKNOWN_CELL
-
-                # Se a flag de uma bomba for tirada, desfaz
-                if @field[x][y] == BOMB_CELL
-                    @bombs_flagged -= 1
-                end
-
                 return true
             end
             
-            # Célula Desconhecida Ou Bomba desconhecida foi flaggeada
+            # If an empty or bomb cell was flagged 
             @field[x][y] = (@field[x][y] == UNKNOWN_CELL) ? EMPTY_UNKNOWN_FLAGGED : BOMB_FLAGGED 
 
-            if @field[x][y] == BOMB_FLAGGED
-                @bombs_flagged += 1
-
-                # Se todas as bombas foram flaggeadas
-                if @bombs_flagged == @nbombs
-                    @victory = true
-                    @playing = false
-                end
-            end
             return true 
         end
         
@@ -138,13 +135,13 @@ module MineSweeper
                     new_line = []
                     line.each do |elem|
                         case elem
-                        # Disfarça todas as Flags como de célula vazia
+                        # Disguise all flags as empty cell flags
                         when EMPTY_UNKNOWN_FLAGGED, BOMB_FLAGGED
                             new_line.push(EMPTY_UNKNOWN_FLAGGED)
-                        # Disfarça as bombas como células vazias
+                        # Disguise all Bomb Cells as Unknown Cells
                         when BOMB_CELL
                             new_line.push(UNKNOWN_CELL)
-                        # manda o número da célula
+                        # Just send the cell value
                         else
                             new_line.push(elem)
                         end

@@ -13,7 +13,7 @@ module MineSweeper
                     when EMPTY_UNKNOWN_FLAGGED
                         $stdout.print "F "
                     when BOMB_FLAGGED
-                        $stdout.print "O "
+                        $stdout.print "B "
                     when BOMB_CELL
                         $stdout.print "# "
                     when BOMB_EXPLODED
